@@ -279,7 +279,7 @@ export async function analyzeTaxDocument(
 ): Promise<TaxAnalysisResult> {
 
   // FIX: Use VITE variable for Vercel compatibility
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+  const apiKey = import.meta.env.EXPO_PUBLIC_VIBECODE_OPENAI_API_KEY;
 
   if (!apiKey) {
     throw new Error(
