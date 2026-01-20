@@ -1,0 +1,66 @@
+*** INDIA INCOME TAX DEDUCTION RULES (FY 2024-25) ***
+
+-------------------------------------------------------
+1. STANDARD DEDUCTION (Section 16)
+-------------------------------------------------------
+- New Regime: Flat ₹75,000 (Applicable for Salary/Pension)
+- Old Regime: Flat ₹50,000
+
+-------------------------------------------------------
+2. SECTION 80C (Investments) - OLD REGIME ONLY
+-------------------------------------------------------
+Maximum Limit: ₹1.5 Lakhs (Combined)
+Eligible Items:
+- EPF (Employee Provident Fund) - Employee Share
+- PPF (Public Provident Fund)
+- ELSS (Equity Linked Savings Scheme) Mutual Funds
+- LIC / Life Insurance Premiums
+- Principal Repayment of Home Loan
+- Sukanya Samriddhi Yojana (SSY)
+- Children’s Tuition Fees (Max 2 children)
+- 5-Year Tax Saver FD
+
+-------------------------------------------------------
+3. SECTION 80D (Health Insurance) - OLD REGIME ONLY
+-------------------------------------------------------
+A. Self, Spouse & Children:
+   - Limit: ₹25,000 (Age < 60)
+   - Limit: ₹50,000 (Senior Citizen, Age 60+)
+
+B. Parents:
+   - Limit: ₹25,000 (Parents Age < 60)
+   - Limit: ₹50,000 (Parents Senior Citizen)
+
+C. Preventive Health Checkup:
+   - Included within the above limits (Max ₹5,000)
+
+-------------------------------------------------------
+4. HRA (House Rent Allowance) - OLD REGIME ONLY
+-------------------------------------------------------
+Exemption is the LOWEST of:
+1. Actual HRA Received
+2. Rent Paid minus 10% of Basic Salary (+ DA)
+3. 50% of Basic Salary (Metro Cities) or 40% (Non-Metro)
+*Requires valid Rent Receipts or PAN of Landlord if rent > ₹1L/year.
+
+-------------------------------------------------------
+5. SECTION 80CCD (1B) (NPS) - OLD REGIME ONLY
+-------------------------------------------------------
+- Additional deduction for National Pension System (NPS).
+- Limit: ₹50,000 (Over and above the ₹1.5L 80C limit).
+
+-------------------------------------------------------
+6. SECTION 24(b) (Home Loan Interest) - OLD REGIME ONLY
+-------------------------------------------------------
+- Self-Occupied Property: Max deduction ₹2 Lakhs.
+- Let-Out Property: Entire interest is deductible (but loss set-off capped at ₹2L).
+
+-------------------------------------------------------
+7. DEDUCTIONS ALLOWED IN NEW REGIME
+-------------------------------------------------------
+Most deductions (80C, 80D, HRA, LTA) are REMOVED.
+Exceptions (Allowed):
+1. Standard Deduction (₹75,000)
+2. Employer Contribution to NPS (Sec 80CCD(2)) - Max 10% of Salary (14% for Govt).
+3. Agniveer Corpus Fund (Sec 80CCH).
+4. Transport Allowance (Only for Divyang/Handicapped employees).

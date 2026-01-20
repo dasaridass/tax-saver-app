@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "TaxSaver AI",
+    "slug": "tax-saver-ai",
+    "scheme": "taxsaver",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yourname.taxsaver"
+    },
+    "android": {
+      "edgeToEdgeEnabled": true,
+      "package": "com.yourname.taxsaver"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

@@ -1,0 +1,73 @@
+*** US FEDERAL TAX RULES - TAX YEAR 2025 (Filing in 2026) ***
+
+-------------------------------------------------------
+1. STANDARD DEDUCTION (2025)
+-------------------------------------------------------
+The "Tax Free" amount you can subtract from your income before calculating tax.
+- Single / Married Filing Separately: $15,750
+- Married Filing Jointly: $31,500
+- Head of Household: $23,625
+- Seniors (65+): Add $2,000 (if Single) or $1,600 (if Married) to the above.
+
+-------------------------------------------------------
+2. FEDERAL INCOME TAX BRACKETS (2025)
+-------------------------------------------------------
+*Note: These are "marginal" rates. You only pay the higher rate on the money IN that bracket.*
+
+**A. Single Filers**
+- 10%: $0 to $11,925
+- 12%: $11,926 to $48,475
+- 22%: $48,476 to $103,350
+- 24%: $103,351 to $197,300
+- 32%: $197,301 to $250,525
+- 35%: $250,526 to $626,350
+- 37%: Over $626,350
+
+**B. Married Filing Jointly**
+- 10%: $0 to $23,850
+- 12%: $23,851 to $96,950
+- 22%: $96,951 to $206,700
+- 24%: $206,701 to $394,600
+- 32%: $394,601 to $501,050
+- 35%: $501,051 to $751,600
+- 37%: Over $751,600
+
+-------------------------------------------------------
+3. RETIREMENT SAVINGS LIMITS (2025) - "The Money Makers"
+-------------------------------------------------------
+**401(k) / 403(b) Plans:**
+- Employee Limit: $23,500 (This is the max you can deduct from salary)
+- Catch-up (Age 50-59): Add $7,500 (Total $31,000)
+- Super Catch-up (Age 60-63): Add $11,250 (Total $34,750) - *New Rule!*
+
+**IRA (Traditional & Roth):**
+- Contribution Limit: $7,000
+- Catch-up (Age 50+): Add $1,000 (Total $8,000)
+
+-------------------------------------------------------
+4. HEALTH SAVINGS ACCOUNT (HSA) - 2025
+-------------------------------------------------------
+*Triple Tax Advantage: Tax-free in, Tax-free growth, Tax-free out for medical.*
+- Self-Only Coverage: $4,300
+- Family Coverage: $8,550
+- Catch-up (Age 55+): Add $1,000
+
+-------------------------------------------------------
+5. PAYSTUB ANALYSIS LOGIC (FOR AI)
+-------------------------------------------------------
+When analyzing a paystub, apply these checks:
+
+**Check 1: "The Free Loan" (Over-Withholding)**
+- Calculate `Annualized Salary` = `Gross Pay` x `Pay Periods`.
+- Calculate `Annualized Tax Paid` = `Fed Tax Withheld` x `Pay Periods`.
+- Compare `Annualized Tax Paid` vs. the `Tax Brackets` above (minus Standard Deduction).
+- *Trigger:* If the user is on track to get a refund > $3,000, advise them to adjust W-4 to get that money in their monthly paycheck instead.
+
+**Check 2: "The Match Miss" (401k)**
+- Identify `401k Deduction`.
+- Calculate % = (`401k Deduction` / `Gross Pay`).
+- *Trigger:* If % < 3%, Warn User: "Most companies match 3-6%. You might be losing free money. Check your employer's match policy."
+
+**Check 3: "The HSA Gap"**
+- Identify `HSA Deduction`.
+- *Trigger:* If $0, check if they have a High Deductible Health Plan (HDHP). If yes, suggest HSA to save 22-24% in taxes immediately.

@@ -1,0 +1,56 @@
+*** INDIA TAX SLABS FY 2024-25 (AY 2025-26) ***
+** UPDATED PER JULY 2024 UNION BUDGET **
+
+-------------------------------------------------------
+OPTION A: NEW TAX REGIME (Default & Revised)
+-------------------------------------------------------
+Basic Exemption Limit: ₹3,00,000
+Standard Deduction (Salaried): ₹75,000 (Increased from ₹50k)
+Rebate u/s 87A: Available if Taxable Income <= ₹7,00,000.
+(Effectively zero tax for salary up to ₹7.75 Lakhs)
+
+SLAB RATES (NEW REGIME):
+1. Up to ₹3,00,000          : NIL
+2. ₹3,00,001 to ₹7,00,000   : 5%
+3. ₹7,00,001 to ₹10,00,000  : 10%
+4. ₹10,00,001 to ₹12,00,000 : 15%
+5. ₹12,00,001 to ₹15,00,000 : 20%
+6. Above ₹15,00,000         : 30%
+
+SURCHARGE (NEW REGIME):
+- Income > ₹50L to ₹1Cr: 10%
+- Income > ₹1Cr to ₹2Cr: 15%
+- Income > ₹2Cr: 25% (Capped at 25%)
+
+-------------------------------------------------------
+OPTION B: OLD TAX REGIME (Optional)
+-------------------------------------------------------
+Basic Exemption Limit: ₹2,50,000 (Age < 60)
+Standard Deduction (Salaried): ₹50,000
+Rebate u/s 87A: Available if Taxable Income <= ₹5,00,000.
+
+SLAB RATES (OLD REGIME - Age < 60):
+1. Up to ₹2,50,000          : NIL
+2. ₹2,50,001 to ₹5,00,000   : 5%
+3. ₹5,00,001 to ₹10,00,000  : 20%
+4. Above ₹10,00,000         : 30%
+
+SENIOR CITIZENS (60-80 Years):
+- Basic Exemption: ₹3,00,000
+- 3L-5L: 5% | 5L-10L: 20% | >10L: 30%
+
+SUPER SENIOR CITIZENS (80+ Years):
+- Basic Exemption: ₹5,00,000
+- 5L-10L: 20% | >10L: 30%
+
+SURCHARGE (OLD REGIME):
+- Income > ₹50L to ₹1Cr: 10%
+- Income > ₹1Cr to ₹2Cr: 15%
+- Income > ₹2Cr to ₹5Cr: 25%
+- Income > ₹5Cr: 37%
+
+-------------------------------------------------------
+COMMON RULES (BOTH REGIMES)
+-------------------------------------------------------
+- Health & Education Cess: 4% on (Tax + Surcharge)
+- Rounding Off: Taxable Income rounded to nearest ₹10 (Sec 288A). Tax Payable rounded to nearest ₹10 (Sec 288B).
