@@ -224,87 +224,48 @@ Before calculating Annual Income, you MUST determine the Pay Frequency based on 
 3. **Rule C (Weekly):** If Hours < 60 (e.g., 40), FORCE Frequency = "Weekly" (Multiplier x52).
 4. *Only refer to printed labels (e.g. "Bi-Weekly") if Current Hours are missing.*
 
+**MATH GUARDRAILS (DO NOT IGNORE):**
+- IF Frequency detected is "Monthly" -> YOU MUST USE x12. (Formula: Pay x 12).
+- IF Frequency detected is "Bi-Weekly" -> YOU MUST USE x26. (Formula: Pay x 26).
+- **NEVER** calculate "Monthly" income using x26. This is a critical failure.
+- **NEVER** calculate "Bi-Weekly" income using x12.
+
 **STEP 1: ANALYZE WITHHOLDING**
 - Calculate Annual Federal Withholding = (Fed Tax per period) × (Multiplier)
-- Calculate expected tax liability based on current brackets
-- If projected Refund > $3,000: Flag as "Over-withholding - you're giving IRS an interest-free loan"
-- Calculate extra per-paycheck amount they could keep: Refund ÷ (number of pay periods)
+- Check for "Over-withholding" if refund > $3,000.
 
 **STEP 2: RETIREMENT CHECKS (401k & Match)**
-- Identify ALL 401k-related deductions on the paystub
-- IMPORTANT: Look for THREE types of contributions:
-  A. TRADITIONAL (PRE-TAX) 401K
-  B. ROTH 401K (POST-TAX)
-  C. EMPLOYER MATCH (FREE MONEY - does NOT count toward $23,000 limit)
-
-- EMPLOYEE TOTAL = Traditional 401K + Roth 401K (BOTH count toward $23,000 limit!)
-- Calculate Contribution % = (EMPLOYEE TOTAL / Gross Pay) × 100
-- Calculate Annual Employee 401k = (per-period Traditional + Roth) × (Multiplier)
-- If % < 3%: Warn "⚠️ Likely missing Employer Match (FREE MONEY). Most employers match 3-6%."
-- If % < 15% and income allows: Suggest increasing to capture tax savings
-- If maxing out ($23,000): Mark as "Strong Saver ✅"
-- Calculate 401k Tax Savings = (Gap to $23,000) × (Marginal Tax Rate)
+- Identify TRADITIONAL (Pre-Tax), ROTH (Post-Tax), and EMPLOYER MATCH.
+- Employee Limit: $23,000 (Combined Traditional + Roth).
+- Employer Match: Does NOT count toward limit (Free Money).
+- If Contribution % < 3%: Warn "⚠️ Likely missing Employer Match".
 
 **STEP 3: THE "ROTH" & "IRA" CHECK**
-- **Roth 401(k):** Check if the deduction says "Roth" or "Post-Tax"
-  - If NOT present and User Tax Bracket is Low (10% or 12%), Suggest: "Consider switching to Roth 401(k) to pay tax now while rates are low."
-- **Roth IRA (Private):** This will NOT be on the paystub.
-  - Logic: If Annual Income < $161,000 (Single) or < $240,000 (Married), ADD this to recommendations:
-    "✅ Missed Opportunity: You qualify for a Roth IRA. Open a private account and invest up to $7,000 post-tax for tax-free growth."
+- If "Roth" is not present and Tax Bracket is Low (10-12%): Suggest switching to Roth 401(k).
+- **Roth IRA:** If Annual Income < $161,000 (Single), suggest opening a private Roth IRA ($7,000 limit).
 
 **STEP 4: HSA CHECK**
-- Look for "HSA" deduction
-- If HSA = $0 or not present, and any Medical/Health deduction exists:
-  - Suggest: "Do you have a High Deductible Health Plan (HDHP)? If so, you're missing the HSA triple tax break."
-- HSA Limits 2024: $4,150 (individual) / $8,300 (family)
-- Calculate HSA Tax Savings = $4,150 × (Marginal Tax Rate)
+- If HSA = $0 and Medical deduction exists: Suggest HSA for Triple Tax Break.
+- Limit: $4,150 (Individual) / $8,300 (Family).
 
 **OUTPUT FORMAT (JSON ONLY):**
 {
   "summary": {
     "totalIncome": <ANNUAL gross income>,
-    "currentTaxLiability": <ANNUAL federal withholding from paystub>,
+    "currentTaxLiability": <ANNUAL federal withholding>,
     "potentialSavings": <total calculated tax savings>,
-    "effectiveTaxRate": <fed withholding / gross × 100>
+    "effectiveTaxRate": <percentage>
   },
-  "payFrequencyDetected": "Monthly/Bi-Weekly/Weekly/Semi-Monthly",
-  "calculationExplanation": "$X × Y = $Z annual gross income",
-  "usComparison": {
-    "current": {
-      "grossIncome": <annual>,
-      "federalWithholding": <annual>,
-      "stateWithholding": <annual>,
-      "fica": <annual SS + Medicare>,
-      "totalDeductions": <annual 401k + HSA current>,
-      "effectiveRate": <percentage>
-    },
-    "optimized": {
-      "grossIncome": <same>,
-      "federalWithholding": <REDUCED by potential savings>,
-      "stateWithholding": <same>,
-      "fica": <same>,
-      "totalDeductions": <maxed 401k $23,000 + HSA $4,150>,
-      "effectiveRate": <lower percentage>
-    },
-    "annualSavings": <total tax savings>
-  },
+  "payFrequencyDetected": "Monthly/Bi-Weekly/Weekly",
+  "calculationExplanation": "Detected <Hours> hours -> Frequency <Frequency>. Math: $<Gross> x <Multiplier> = $<Annual>",
+  "debug_note": "Hours: X, Freq: Y, Mult: Z",
   "missedSavings": [],
   "deductions": [],
   "recommendations": [],
-  "disclaimer": "This analysis is for informational purposes only. Consult a qualified CPA for personalized advice."
+  "disclaimer": "Informational only. Consult a CPA."
 }
-
-**CRITICAL RULES:**
-1. currentTaxLiability = ANNUAL federal withholding from paystub (Fed Tax × multiplier)
-2. summary.potentialSavings = 401k tax savings + HSA tax savings
-3. deductions[0].potentialSavings (401k) = (23000 - annual401k) × marginalRate
-4. deductions[1].potentialSavings (HSA) = 4150 × marginalRate
-5. deductions[2].potentialSavings (Roth IRA) = 7000 (investment amount, NOT tax savings)
-6. ALWAYS check Roth IRA eligibility based on income
-7. ALWAYS flag if 401k contribution % is below typical employer match (3-6%)
 `;
 }
-
 export interface AnalyzeOptions {
   redactedText: string;
   countryMode: CountryMode;
