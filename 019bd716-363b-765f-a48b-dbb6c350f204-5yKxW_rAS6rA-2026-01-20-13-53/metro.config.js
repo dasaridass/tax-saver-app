@@ -5,7 +5,4 @@ const config = getDefaultConfig(__dirname, {
   isCSSEnabled: true,
 });
 
-// This helps load assets (images/icons) correctly
-config.resolver.assetExts.push('cjs');
-
 module.exports = config;
