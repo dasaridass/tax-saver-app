@@ -224,7 +224,6 @@ Before calculating Annual Income, you MUST determine the Pay Frequency based on 
 3. **Rule C (Weekly):** If Hours < 60 (e.g., 40), FORCE Frequency = "Weekly" (Multiplier x52).
 4. *Only refer to printed labels (e.g. "Bi-Weekly") if Current Hours are missing.*
 
-
 **STEP 1: ANALYZE WITHHOLDING**
 - Calculate Annual Federal Withholding = (Fed Tax per period) × (Multiplier)
 - Calculate expected tax liability based on current brackets
@@ -241,7 +240,7 @@ Before calculating Annual Income, you MUST determine the Pay Frequency based on 
 - EMPLOYEE TOTAL = Traditional 401K + Roth 401K (BOTH count toward $23,000 limit!)
 - Calculate Contribution % = (EMPLOYEE TOTAL / Gross Pay) × 100
 - Calculate Annual Employee 401k = (per-period Traditional + Roth) × (Multiplier)
-- If % < 3%: Warn "⚠️ Likely missing Employer Match (FREE MONEY). Most employers match 3-6%."											 
+- If % < 3%: Warn "⚠️ Likely missing Employer Match (FREE MONEY). Most employers match 3-6%."
 - If % < 15% and income allows: Suggest increasing to capture tax savings
 - If maxing out ($23,000): Mark as "Strong Saver ✅"
 - Calculate 401k Tax Savings = (Gap to $23,000) × (Marginal Tax Rate)
@@ -268,7 +267,7 @@ Before calculating Annual Income, you MUST determine the Pay Frequency based on 
     "potentialSavings": <total calculated tax savings>,
     "effectiveTaxRate": <fed withholding / gross × 100>
   },
- "payFrequencyDetected": "Monthly/Bi-Weekly/Weekly/Semi-Monthly",
+  "payFrequencyDetected": "Monthly/Bi-Weekly/Weekly/Semi-Monthly",
   "calculationExplanation": "$X × Y = $Z annual gross income",
   "usComparison": {
     "current": {
@@ -319,7 +318,7 @@ export async function analyzeTaxDocument(
 ): Promise<TaxAnalysisResult> {
 
   // FIX: Use VITE variable for Vercel compatibility
-  const apiKey = import.meta.env.EXPO_PUBLIC_VIBECODE_OPENAI_API_KEY;
+  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
 
   if (!apiKey) {
     throw new Error(
