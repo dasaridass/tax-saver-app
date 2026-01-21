@@ -343,21 +343,23 @@ export async function analyzeTaxDocument(
       'Content-Type': 'application/json',
       Authorization: `Bearer ${apiKey}`,
     },
-    body: JSON.stringify({
-      model: 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          content: systemPrompt,
-        },
-        {
-          role: 'user',
-          content: redactedText,
-        },
-      ],
-      temperature: 0.3,
-      max_tokens: 4000,
-    }),
+ body: JSON.stringify({
+  model: 'gpt-4o',
+  response_format: { type: 'json_object' },
+  messages: [
+    {
+      role: 'system',
+      content: systemPrompt,
+    },
+    {
+      role: 'user',
+      content: redactedText,
+    },
+  ],
+  temperature: 0.3,
+  max_tokens: 4000
+}),
+
   });
 
   if (!response.ok) {
@@ -366,12 +368,14 @@ export async function analyzeTaxDocument(
   }
 
   const data = await response.json();
-  const outputText = data.choices?.[0]?.message?.content || '';
+const outputText = data.choices?.[0]?.message?.content || '';
 
-  const jsonMatch = outputText.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) {
-    throw new Error('Could not parse tax analysis response');
-  }
+let analysis: TaxAnalysisResult;
+try {
+  analysis = JSON.parse(outputText);
+} catch (e) {
+  throw new Error(`Invalid JSON from model:\n${outputText}`);
+}
 
   const analysis: TaxAnalysisResult = JSON.parse(jsonMatch[0]);
   analysis.countryMode = countryMode;
