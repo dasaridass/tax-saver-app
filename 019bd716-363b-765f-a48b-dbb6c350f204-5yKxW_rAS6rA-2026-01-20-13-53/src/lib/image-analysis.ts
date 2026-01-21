@@ -160,10 +160,15 @@ STEP 1: DETERMINE PAY FREQUENCY (CRITICAL!)
 Look for clues in the document:
 - "Pay Period" dates: 01/01 - 01/31 = MONTHLY (multiply by 12)
 - "Pay Period" dates: 01/01 - 01/14 = BI-WEEKLY (multiply by 26)
-- Total Hours ~160-200 = MONTHLY (multiply by 12)
+- Total Hours > 140 = MONTHLY (multiply by 12)
 - Total Hours ~80 = BI-WEEKLY (multiply by 26)
 - Total Hours ~40 = WEEKLY (multiply by 52)
 
+	⚠️ LOGIC GUARDRAILS (DO NOT IGNORE):
+- IF you identify Frequency as "Monthly", YOU MUST USE x12.
+- IF you identify Frequency as "Bi-Weekly", YOU MUST USE x26.
+- NEVER multiply "Monthly" pay by 26.
+- NEVER multiply "Bi-Weekly" pay by 12.									
 =======================================================================
 STEP 1.5: EXTRACT 401(k) CONTRIBUTIONS (CRITICAL!)
 =======================================================================
@@ -182,21 +187,13 @@ C. EMPLOYER MATCH:
 
 ⚠️ CRITICAL CALCULATION:
 - EMPLOYEE TOTAL = Traditional 401K + Roth 401K (both count toward $23,000 limit!)
-- Example:
-  - Traditional 401K: $300/period
-  - Roth 401K: $200/period
-  - Employer Match: $250/period
-  - EMPLOYEE CONTRIBUTION = $300 + $200 = $500/period (counts toward limit)
-  - TOTAL 401K (for display) = $500 + $250 = $750/period
 
-The $23,000 limit applies to EMPLOYEE contributions (Traditional + Roth combined).
-The employer match is on TOP of this limit.
 
 =======================================================================
 STEP 2: CALCULATE ANNUAL INCOME (SHOW YOUR MATH!)
 =======================================================================
 1. Find GROSS PAY for the current period (NOT YTD!)
-2. Multiply by the frequency:
+2. Multiply by the frequency determined in Step 1:
    - MONTHLY: Gross × 12
    - BI-WEEKLY: Gross × 26
    - WEEKLY: Gross × 52
@@ -207,9 +204,6 @@ EXAMPLE (YOU MUST DO THIS):
 - CALCULATION: $10,338.43 × 12 = $124,061.16
 - This goes in totalIncome field!
 
-⚠️ COMMON ERROR TO AVOID:
-- $10,000/month is NOT $50,000/year
-- $10,000/month × 12 = $120,000/year
 
 =======================================================================
 STEP 3: CALCULATE TAX SAVINGS OPPORTUNITIES
@@ -226,13 +220,11 @@ B. 401(k) SAVINGS:
    - Find annual 401k contribution = (per-period 401k) × multiplier
    - Gap = $23,000 - annual401k
    - TAX SAVINGS = Gap × marginalRate
-   - Example: If annual 401k = $1,500 and rate = 24%
-     Gap = $23,000 - $1,500 = $21,500
-     Tax Savings = $21,500 × 0.24 = $5,160
+   
 
 C. HSA SAVINGS (if no HSA on paystub):
    - TAX SAVINGS = $4,150 × marginalRate
-   - Example: $4,150 × 0.24 = $996
+
 
 D. ROTH IRA (if income < $161k single):
    - Investment opportunity = $7,000 (not tax savings, but wealth building)
@@ -249,7 +241,7 @@ OUTPUT JSON FORMAT
     "effectiveTaxRate": <fedWithholding / grossIncome × 100>
   },
   "payFrequencyDetected": "Monthly",
-  "calculationExplanation": "$10,338.43 × 12 = $124,061.16 annual gross",
+  "calculationExplanation": "$<Gross> x <Multiplier> = $<Annual>",,
   "usComparison": {
     "current": {
       "grossIncome": <annual gross>,
@@ -337,6 +329,7 @@ OUTPUT JSON FORMAT
 FINAL VERIFICATION CHECKLIST (DO THIS BEFORE RESPONDING!)
 =======================================================================
 ☐ Is totalIncome = grossPerPeriod × multiplier? (e.g., $10k × 12 = $120k)
+☐ Did I enforce: Monthly -> x12 AND Bi-Weekly -> x26?
 ☐ Did I find ALL 401k types: Traditional, Roth, AND Employer Match?
 ☐ Did I SUM Traditional + Roth for employee currentAmount?
 ☐ Did I report traditionalAmount and rothAmount separately?
