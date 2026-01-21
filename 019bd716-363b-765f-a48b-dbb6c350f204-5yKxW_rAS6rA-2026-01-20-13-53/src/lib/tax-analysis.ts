@@ -217,21 +217,28 @@ ${taxRulesText}
 
 IMPORTANT: The document has been redacted for privacy. "[REDACTED_SSN]" indicates Social Security Numbers that were removed for security.
 
-**CRITICAL INSTRUCTION - PAY FREQUENCY LOGIC (STRICT):**
-Before calculating Annual Income, you MUST determine the Pay Frequency based on "Current Hours" or "Total Hours".
-1. **Rule A (Monthly):** If Hours > 140 (e.g., 160, 205, 210), FORCE Frequency = "Monthly" (Multiplier x12).
-2. **Rule B (Bi-Weekly):** If Hours are 70-100 (e.g., 80, 86, 88), FORCE Frequency = "Bi-Weekly" (Multiplier x26).
-3. **Rule C (Weekly):** If Hours < 60 (e.g., 40), FORCE Frequency = "Weekly" (Multiplier x52).
-4. *Only refer to printed labels (e.g. "Bi-Weekly") if Current Hours are missing.*
+**CRITICAL RULE: INCOME CALCULATION (THE "GOLDEN" NUMBER)**
+You must calculate the "Calculated Annual Income" using this specific logic. Do NOT skip this.
+
+A. Extract **Current Gross Pay** from the document.
+B. Extract **Pay Frequency** (Weekly, Bi-Weekly, Semi-Monthly, Monthly).
+C. **CALCULATE** the Annual Income strictly:
+   - Weekly: Current Gross x 52
+   - Bi-Weekly: Current Gross x 26
+   - Semi-Monthly: Current Gross x 24
+   - Monthly: Current Gross x 12
+D. **IGNORE** any "YTD Gross", "Year to Date", or "Total Income" fields printed on the document. They are misleading.
 
 **MATH GUARDRAILS (DO NOT IGNORE):**
-- IF Frequency detected is "Monthly" -> YOU MUST USE x12. (Formula: Pay x 12).
-- IF Frequency detected is "Bi-Weekly" -> YOU MUST USE x26. (Formula: Pay x 26).
-- **NEVER** calculate "Monthly" income using x26. This is a critical failure.
+- IF Frequency is "Monthly" -> Formula MUST be: Pay x 12.
+- IF Frequency is "Bi-Weekly" -> Formula MUST be: Pay x 26.
+- **NEVER** calculate "Monthly" income using x26.
 - **NEVER** calculate "Bi-Weekly" income using x12.
 
+**ANALYSIS STEPS:**
+
 **STEP 1: ANALYZE WITHHOLDING**
-- Calculate Annual Federal Withholding = (Fed Tax per period) × (Multiplier)
+- Calculate Annual Federal Withholding = (Fed Tax per period) × (Multiplier from Step C)
 - Check for "Over-withholding" if refund > $3,000.
 
 **STEP 2: RETIREMENT CHECKS (401k & Match)**
@@ -251,10 +258,10 @@ Before calculating Annual Income, you MUST determine the Pay Frequency based on 
 **OUTPUT FORMAT (JSON ONLY):**
 {
   "summary": {
-    "totalIncome": <ANNUAL gross income>,
-    "currentTaxLiability": <ANNUAL federal withholding>,
-    "potentialSavings": <total calculated tax savings>,
-    "effectiveTaxRate": <percentage>
+    "totalIncome": <NUMBER - The value you calculated in Step C above>,
+    "currentTaxLiability": <NUMBER - Annualized Federal Withholding>,
+    "potentialSavings": <NUMBER>,
+    "effectiveTaxRate": <NUMBER>
   },
   "payFrequencyDetected": "Monthly/Bi-Weekly/Weekly",
   "calculationExplanation": "Detected <Hours> hours -> Frequency <Frequency>. Math: $<Gross> x <Multiplier> = $<Annual>",
