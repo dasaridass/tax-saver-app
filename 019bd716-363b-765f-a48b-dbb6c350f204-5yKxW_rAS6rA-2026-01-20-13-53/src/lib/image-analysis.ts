@@ -160,15 +160,15 @@ STEP 1: DETERMINE PAY FREQUENCY (CRITICAL!)
 Look for clues in the document:
 - "Pay Period" dates: 01/01 - 01/31 = MONTHLY (multiply by 12)
 - "Pay Period" dates: 01/01 - 01/14 = BI-WEEKLY (multiply by 26)
-- Total Hours > 140 = MONTHLY (multiply by 12)
-- Total Hours ~80 = BI-WEEKLY (multiply by 26)
+- Total Hours > 140 (e.g., 160, 202, 210) = MONTHLY (multiply by 12)
+- Total Hours ~80 (e.g., 70-100) = BI-WEEKLY (multiply by 26)
 - Total Hours ~40 = WEEKLY (multiply by 52)
 
 	⚠️ LOGIC GUARDRAILS (DO NOT IGNORE):
 - IF you identify Frequency as "Monthly", YOU MUST USE x12.
 - IF you identify Frequency as "Bi-Weekly", YOU MUST USE x26.
 - NEVER multiply "Monthly" pay by 26.
-- NEVER multiply "Bi-Weekly" pay by 12.									
+-NEVER multiply "Bi-Weekly" pay by 12.
 =======================================================================
 STEP 1.5: EXTRACT 401(k) CONTRIBUTIONS (CRITICAL!)
 =======================================================================
@@ -241,7 +241,7 @@ OUTPUT JSON FORMAT
     "effectiveTaxRate": <fedWithholding / grossIncome × 100>
   },
   "payFrequencyDetected": "Monthly",
-  "calculationExplanation": "$<Gross> x <Multiplier> = $<Annual>",,
+  "calculationExplanation": "$<Gross> x <Multiplier> = $<Annual>",
   "usComparison": {
     "current": {
       "grossIncome": <annual gross>,
