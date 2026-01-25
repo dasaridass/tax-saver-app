@@ -1,4 +1,5 @@
 import { ScrollViewStyleReset } from 'expo-router/html';
+import { type PropsWithChildren } from 'react';
 
 // This file is web-only and used to configure the root HTML for every
 // web page during static rendering.
@@ -12,8 +13,16 @@ export default function Root({ children }: { children: React.ReactNode }) {
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
-        {/* 
-          Disable body scrolling on web. This makes ScrollView components work closer to how they do on native. 
+        {/* --- START OF YOUR CUSTOM META TAGS --- */}
+        <meta property="og:title" content="Tax Shield AI - Free Privacy-First Tax Optimizer" />
+        <meta property="og:description" content="Stop overpaying taxes. Instant AI analysis of your US Paystub or Indian Form 16. Privacy-first, zero data storage." />
+        <meta property="og:image" content="https://tax-saver-app.vercel.app/social-preview.png" />
+        <meta property="og:url" content="https://tax-saver-app.vercel.app/" />
+        <meta property="og:type" content="website" />
+        <title>Tax Shield AI</title>
+        {/* --- END OF YOUR CUSTOM META TAGS --- */}
+
+        {/* Disable body scrolling on web. This makes ScrollView components work closer to how they do on native. 
           However, body scrolling is often nice to have for mobile web. If you want to enable it, remove this line.
         */}
         <ScrollViewStyleReset />
