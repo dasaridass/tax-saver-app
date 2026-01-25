@@ -18,6 +18,7 @@
     "web": {
       "bundler": "metro",
       "output": "static",
+	  "template": "./public/index.html"
     },
     "plugins": ["expo-router"],
     "experiments": {
