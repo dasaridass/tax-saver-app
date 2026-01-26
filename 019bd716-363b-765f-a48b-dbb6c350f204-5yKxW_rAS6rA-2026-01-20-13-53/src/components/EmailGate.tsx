@@ -3,6 +3,8 @@ import { View, Text, TextInput, Pressable, ActivityIndicator, Modal } from 'reac
 import { Mail, Lock, Unlock, Check, X } from 'lucide-react-native';
 import { cn } from '@/lib/cn';
 import { useTaxStore } from '@/lib/state/tax-store';
+// Go up one level (..) to find leads-api in the src folder
+import { saveLeadToSheet } from '../leads-api';
 
 // List of blocked disposable/temporary email domains
 const BLOCKED_DOMAINS = [
@@ -106,6 +108,15 @@ export function EmailGate({ visible, onSubmit, onClose, isLoading, potentialSavi
       setError('Please enter your email address');
       return;
     }
+	// --- NEW CODE START ---
+  // Send data to Google Sheets (using props for country/savings if available)
+  // Note: If this component doesn't know the savings amount, you can pass "Unknown" or pass it as a prop.
+  saveLeadToSheet(
+    email, 
+    props.country || "Unknown", 
+    props.savings || "Unknown"
+  );
+  // --- NEW CODE END ---
 
     const validation = validateEmail(email);
     if (!validation.valid) {

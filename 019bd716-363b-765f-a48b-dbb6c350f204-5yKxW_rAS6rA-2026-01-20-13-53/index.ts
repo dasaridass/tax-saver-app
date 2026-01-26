@@ -4,3 +4,4 @@ import { LogBox } from "react-native";
 import "./global.css";
 import "expo-router/entry";
 LogBox.ignoreLogs(["Expo AV has been deprecated", "Disconnected from Metro"]);
+import { saveLeadToSheet } from './leads-api';
