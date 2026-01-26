@@ -103,19 +103,25 @@ export function EmailGate({ visible, onSubmit, onClose, isLoading, potentialSavi
     return { valid: true };
   };
 
-  const handleSubmit = () => {
+const handleSubmit = () => {
+    // 1. Validation
     if (!email.trim()) {
       setError('Please enter your email address');
       return;
     }
-	// --- NEW CODE START ---
-  // Send data to Google Sheets (using props for country/savings if available)
-  // Note: If this component doesn't know the savings amount, you can pass "Unknown" or pass it as a prop.
-  saveLeadToSheet(
-    email, 
-    props.country || "Unknown", 
-    props.savings || "Unknown"
-  );
+
+    // 2. Fire and Forget: Send to Google Sheet
+    // We do NOT await this. We let it run in the background.
+    saveLeadToSheet(
+      email, 
+      props.country || "Unknown", 
+      props.savings || "Unknown"
+    );
+
+    // 3. THE MISSING PIECE: Unlock the report immediately
+    // This removes the "Email Gate" and shows the user their data.
+    props.onSubmit(); 
+};
   // --- NEW CODE END ---
 
     const validation = validateEmail(email);
