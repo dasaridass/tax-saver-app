@@ -92,7 +92,7 @@ ${taxRulesText}
   "summary": {
     "totalIncome": <number - annual gross income>,
     "currentTaxLiability": <number - tax as shown on document>,
-    "potentialSavings": <number - total potential savings>,
+    "potentialSavings": <number - total potential savings if all deductions maximized>,
     "effectiveTaxRate": <number - percentage>
   },
   "regimeComparison": {
@@ -168,9 +168,10 @@ Look for clues in the document:
 - IF you identify Frequency as "Monthly", YOU MUST USE x12.
 - IF you identify Frequency as "Bi-Weekly", YOU MUST USE x26.
 - NEVER multiply "Monthly" pay by 26.
--NEVER multiply "Bi-Weekly" pay by 12.
+- NEVER multiply "Bi-Weekly" pay by 12.
+
 =======================================================================
-STEP 1.5: EXTRACT 401(k) CONTRIBUTIONS (CRITICAL!)
+STEP 1.5: EXTRACT 401(k) CONTRIBUTIONS
 =======================================================================
 Paystubs may show MULTIPLE types of 401k contributions. Look for ALL of these:
 
@@ -188,9 +189,8 @@ C. EMPLOYER MATCH:
 ⚠️ CRITICAL CALCULATION:
 - EMPLOYEE TOTAL = Traditional 401K + Roth 401K (both count toward $23,000 limit!)
 
-
 =======================================================================
-STEP 2: CALCULATE ANNUAL INCOME (SHOW YOUR MATH!)
+STEP 2: CALCULATE ANNUAL INCOME
 =======================================================================
 1. Find GROSS PAY for the current period (NOT YTD!)
 2. Multiply by the frequency determined in Step 1:
@@ -198,33 +198,24 @@ STEP 2: CALCULATE ANNUAL INCOME (SHOW YOUR MATH!)
    - BI-WEEKLY: Gross × 26
    - WEEKLY: Gross × 52
 
-EXAMPLE (YOU MUST DO THIS):
+EXAMPLE:
 - Gross Pay This Period: $10,338.43
 - Frequency: Monthly
 - CALCULATION: $10,338.43 × 12 = $124,061.16
 - This goes in totalIncome field!
 
-
 =======================================================================
 STEP 3: CALCULATE TAX SAVINGS OPPORTUNITIES
 =======================================================================
-A. Determine MARGINAL TAX RATE based on annual income:
-   - $0-$11,600: 10%
-   - $11,601-$47,150: 12%
-   - $47,151-$100,525: 22%
-   - $100,526-$191,950: 24%
-   - $191,951-$243,725: 32%
-   - $243,726-$609,350: 35%
+A. Determine MARGINAL TAX RATE based on annual income.
 
 B. 401(k) SAVINGS:
    - Find annual 401k contribution = (per-period 401k) × multiplier
    - Gap = $23,000 - annual401k
    - TAX SAVINGS = Gap × marginalRate
-   
 
 C. HSA SAVINGS (if no HSA on paystub):
    - TAX SAVINGS = $4,150 × marginalRate
-
 
 D. ROTH IRA (if income < $161k single):
    - Investment opportunity = $7,000 (not tax savings, but wealth building)
@@ -234,13 +225,14 @@ OUTPUT JSON FORMAT
 =======================================================================
 {
   "documentMismatch": false,
+  "currentGrossPay": <NUMBER - The RAW gross pay for this period>,
+  "payFrequencyDetected": "Monthly",
   "summary": {
-    "totalIncome": <MUST be grossPerPeriod × multiplier - VERIFY THIS!>,
+    "totalIncome": <MUST be grossPerPeriod × multiplier>,
     "currentTaxLiability": <fedTaxPerPeriod × multiplier>,
     "potentialSavings": <401kTaxSavings + hsaTaxSavings>,
     "effectiveTaxRate": <fedWithholding / grossIncome × 100>
   },
-  "payFrequencyDetected": "Monthly",
   "calculationExplanation": "$<Gross> x <Multiplier> = $<Annual>",
   "usComparison": {
     "current": {
@@ -268,77 +260,25 @@ OUTPUT JSON FORMAT
       "missedAmount": <gap to $23,000>,
       "maxLimit": 23000,
       "suggestion": "Increase 401(k) contribution to save $X in taxes"
-    },
-    {
-      "section": "HSA",
-      "description": "No HSA contributions detected",
-      "missedAmount": 4150,
-      "maxLimit": 4150,
-      "suggestion": "If you have HDHP, contribute to HSA for triple tax benefit"
-    },
-    {
-      "section": "Roth IRA",
-      "description": "You qualify for tax-free retirement growth",
-      "missedAmount": 7000,
-      "maxLimit": 7000,
-      "suggestion": "Open Roth IRA and contribute up to $7,000/year"
     }
   ],
   "deductions": [
     {
       "category": "401(k) Retirement",
       "section": "Pre-tax + Roth",
-      "currentAmount": <annual EMPLOYEE total (Traditional + Roth) × multiplier>,
-      "traditionalAmount": <annual traditional 401k × multiplier>,
-      "rothAmount": <annual Roth 401k × multiplier>,
-      "employerMatch": <annual EMPLOYER match × multiplier - report separately!>,
+      "currentAmount": <annual EMPLOYEE total>,
+      "traditionalAmount": <annual traditional 401k>,
+      "rothAmount": <annual Roth 401k>,
+      "employerMatch": <annual EMPLOYER match>,
       "maxLimit": 23000,
       "potentialSavings": <(23000 - employee currentAmount) × marginalRate>,
       "recommendation": "Increase contribution to reduce taxable income",
       "priority": "high"
-    },
-    {
-      "category": "HSA",
-      "section": "Pre-tax",
-      "currentAmount": <annual HSA, likely 0>,
-      "maxLimit": 4150,
-      "potentialSavings": <4150 × marginalRate if currentAmount is 0>,
-      "recommendation": "Open HSA if you have high-deductible health plan",
-      "priority": "high"
-    },
-    {
-      "category": "Roth IRA",
-      "section": "Post-tax",
-      "currentAmount": 0,
-      "maxLimit": 7000,
-      "potentialSavings": 7000,
-      "recommendation": "Tax-free growth - not on paystub but highly recommended",
-      "priority": "medium"
     }
   ],
-  "recommendations": [
-    "🚨 Increase 401(k) from X% to at least 6% for employer match",
-    "💰 Max 401(k) at $23,000/year to save $X in taxes",
-    "🏥 Open HSA if eligible - save $X in taxes annually",
-    "✅ Open Roth IRA - you qualify for $7,000/year tax-free growth"
-  ],
+  "recommendations": [],
   "disclaimer": "This analysis is for informational purposes only. Consult a qualified CPA for personalized advice."
-}
-
-=======================================================================
-FINAL VERIFICATION CHECKLIST (DO THIS BEFORE RESPONDING!)
-=======================================================================
-☐ Is totalIncome = grossPerPeriod × multiplier? (e.g., $10k × 12 = $120k)
-☐ Did I enforce: Monthly -> x12 AND Bi-Weekly -> x26?
-☐ Did I find ALL 401k types: Traditional, Roth, AND Employer Match?
-☐ Did I SUM Traditional + Roth for employee currentAmount?
-☐ Did I report traditionalAmount and rothAmount separately?
-☐ Did I use only EMPLOYEE contributions (Traditional + Roth) for potentialSavings?
-☐ Did I calculate 401k potentialSavings = gap × marginalRate?
-☐ Did I calculate HSA potentialSavings = $4,150 × marginalRate?
-☐ Did I include all 3 deductions (401k, HSA, Roth IRA)?
-☐ Did I include all 3 missedSavings entries?
-☐ Does summary.potentialSavings = 401k savings + HSA savings?`;
+}`;
 }
 
 export interface ImageAnalysisOptions {
@@ -428,15 +368,6 @@ export async function analyzeImageWithVision({
 
   const parsedResponse = JSON.parse(jsonMatch[0]);
 
-  // Debug logging
-  console.log('[TaxSaver] AI Response parsed:', JSON.stringify({
-    totalIncome: parsedResponse.summary?.totalIncome,
-    payFrequency: parsedResponse.payFrequencyDetected,
-    calculationExplanation: parsedResponse.calculationExplanation,
-    deductionsCount: parsedResponse.deductions?.length,
-    missedSavingsCount: parsedResponse.missedSavings?.length,
-  }, null, 2));
-
   // Check for document mismatch
   if (parsedResponse.documentMismatch === true) {
     const detectedCountry = parsedResponse.detectedCountry === 'india' ? 'Indian' : 'US';
@@ -449,8 +380,33 @@ export async function analyzeImageWithVision({
   const analysis: TaxAnalysisResult = parsedResponse;
   analysis.countryMode = countryMode;
 
-  // Post-processing for US mode
+  // --- POST-PROCESSING FOR US MODE (CRITICAL FIXES) ---
   if (countryMode === 'us') {
+    
+    // 1. MATH CORRECTION: Force the logic if AI drifted
+    if (analysis.currentGrossPay && analysis.payFrequencyDetected) {
+      const freq = analysis.payFrequencyDetected.toLowerCase();
+      const gross = analysis.currentGrossPay;
+      let multiplier = 0;
+
+      if (freq.includes('month') && !freq.includes('semi')) {
+        multiplier = 12; // Strictly Monthly
+      } else if (freq.includes('bi')) {
+        multiplier = 26; // Strictly Bi-Weekly
+      } else if (freq.includes('week')) {
+        multiplier = 52; // Weekly
+      } else if (freq.includes('semi')) {
+        multiplier = 24; // Semi-Monthly
+      }
+
+      if (multiplier > 0) {
+        // OVERRIDE the AI's math
+        analysis.summary.totalIncome = gross * multiplier;
+        analysis.calculationExplanation = `Corrected by System: $${gross.toLocaleString()} x ${multiplier} (${analysis.payFrequencyDetected}) = $${(gross * multiplier).toLocaleString()}`;
+      }
+    }
+
+    // 2. RECALCULATE MARGINAL RATE based on potentially corrected income
     const annualIncome = analysis.summary.totalIncome || 0;
     let marginalRate = 0.24;
 
@@ -467,7 +423,17 @@ export async function analyzeImageWithVision({
       analysis.deductions = [];
     }
 
-    // Check if 401k exists, add if missing
+    // 3. RECALCULATE DEDUCTION SAVINGS with new marginal rate
+    analysis.deductions = analysis.deductions.map(d => {
+      // If 401k or HSA, recalculate potential savings
+      if (d.category?.toLowerCase().includes('401') || d.category?.toLowerCase().includes('hsa')) {
+        const gap = Math.max(0, d.maxLimit - d.currentAmount);
+        d.potentialSavings = Math.round(gap * marginalRate);
+      }
+      return d;
+    });
+
+    // Add missing categories (401k, HSA, Roth)
     const has401k = analysis.deductions.some(d => d.category?.toLowerCase().includes('401'));
     if (!has401k) {
       analysis.deductions.push({
@@ -476,12 +442,11 @@ export async function analyzeImageWithVision({
         currentAmount: 0,
         maxLimit: 23000,
         potentialSavings: Math.round(23000 * marginalRate),
-        recommendation: 'Contribute to 401(k) to reduce taxable income and save on taxes',
+        recommendation: 'Contribute to 401(k) to reduce taxable income',
         priority: 'high',
       });
     }
 
-    // Check if HSA exists, add if missing
     const hasHSA = analysis.deductions.some(d => d.category?.toLowerCase().includes('hsa'));
     if (!hasHSA) {
       analysis.deductions.push({
@@ -490,100 +455,25 @@ export async function analyzeImageWithVision({
         currentAmount: 0,
         maxLimit: 4150,
         potentialSavings: Math.round(4150 * marginalRate),
-        recommendation: 'If you have a high-deductible health plan, open an HSA for triple tax benefits',
+        recommendation: 'If you have a high-deductible health plan, open an HSA',
         priority: 'high',
       });
     }
 
-    // Check if Roth IRA exists, add if missing
-    const hasRoth = analysis.deductions.some(d => d.category?.toLowerCase().includes('roth'));
-    if (!hasRoth && annualIncome < 161000) {
-      analysis.deductions.push({
-        category: 'Roth IRA',
-        section: 'Post-tax',
-        currentAmount: 0,
-        maxLimit: 7000,
-        potentialSavings: 7000,
-        recommendation: 'Open a Roth IRA for tax-free growth - you qualify based on your income',
-        priority: 'medium',
-      });
-    }
+    // Recalculate total potential savings
+    const totalTaxSavings = analysis.deductions.reduce((sum, d) => sum + (d.potentialSavings || 0), 0);
+    analysis.summary.potentialSavings = totalTaxSavings;
 
-    // Ensure missedSavings array exists
-    if (!analysis.missedSavings) {
-      analysis.missedSavings = [];
-    }
-
-    // Add missed savings entries if missing
-    const hasMissed401k = analysis.missedSavings.some(m => m.section?.includes('401'));
-    if (!hasMissed401k) {
-      const current401k = analysis.deductions.find(d => d.category?.toLowerCase().includes('401'))?.currentAmount || 0;
-      const gap = Math.max(0, 23000 - current401k);
-      if (gap > 0) {
-        analysis.missedSavings.push({
-          section: '401(k)',
-          description: `Contributing $${current401k.toLocaleString()}/year vs $23,000 limit`,
-          missedAmount: gap,
-          maxLimit: 23000,
-          suggestion: `Increase 401(k) contribution to save $${Math.round(gap * marginalRate).toLocaleString()} in taxes`,
-        });
-      }
-    }
-
-    const hasMissedHSA = analysis.missedSavings.some(m => m.section?.includes('HSA'));
-    if (!hasMissedHSA) {
-      const currentHSA = analysis.deductions.find(d => d.category?.toLowerCase().includes('hsa'))?.currentAmount || 0;
-      const gap = Math.max(0, 4150 - currentHSA);
-      if (gap > 0) {
-        analysis.missedSavings.push({
-          section: 'HSA',
-          description: currentHSA > 0 ? `Contributing $${currentHSA.toLocaleString()}/year vs $4,150 limit` : 'No HSA contributions detected',
-          missedAmount: gap,
-          maxLimit: 4150,
-          suggestion: `If you have HDHP, contribute to HSA for $${Math.round(gap * marginalRate).toLocaleString()} in tax savings`,
-        });
-      }
-    }
-
-    const hasMissedRoth = analysis.missedSavings.some(m => m.section?.includes('Roth'));
-    if (!hasMissedRoth && annualIncome < 161000) {
-      analysis.missedSavings.push({
-        section: 'Roth IRA',
-        description: 'You qualify for tax-free retirement growth',
-        missedAmount: 7000,
-        maxLimit: 7000,
-        suggestion: 'Open Roth IRA and contribute up to $7,000/year for tax-free growth',
-      });
-    }
-
-    // Recalculate potential savings
-    let totalTaxSavings = 0;
-    analysis.deductions = analysis.deductions.map((deduction) => {
-      const category = deduction.category?.toLowerCase() || '';
-      const gap = Math.max(0, deduction.maxLimit - deduction.currentAmount);
-
-      if (category.includes('roth')) {
-        deduction.potentialSavings = gap;
-        return deduction;
-      }
-
-      if (category.includes('401') || category.includes('hsa')) {
-        const taxSavings = Math.round(gap * marginalRate);
-        if (deduction.potentialSavings === 0 || deduction.potentialSavings < taxSavings * 0.5) {
-          deduction.potentialSavings = taxSavings;
-        }
-        totalTaxSavings += deduction.potentialSavings;
-      }
-
-      return deduction;
-    });
-
-    if (totalTaxSavings > 0 && (analysis.summary.potentialSavings === 0 || analysis.summary.potentialSavings < totalTaxSavings * 0.5)) {
-      analysis.summary.potentialSavings = totalTaxSavings;
-    }
-
+    // Update US Comparison
     if (analysis.usComparison) {
-      analysis.usComparison.annualSavings = analysis.summary.potentialSavings;
+      analysis.usComparison.annualSavings = totalTaxSavings;
+      analysis.usComparison.current.grossIncome = annualIncome;
+      analysis.usComparison.optimized.grossIncome = annualIncome;
+      // Recalculate effective rates
+      if (annualIncome > 0) {
+        analysis.usComparison.current.effectiveRate = (analysis.usComparison.current.federalWithholding / annualIncome) * 100;
+        analysis.usComparison.optimized.effectiveRate = (analysis.usComparison.optimized.federalWithholding / annualIncome) * 100;
+      }
     }
   }
 
@@ -593,7 +483,7 @@ export async function analyzeImageWithVision({
       return total + (deduction.potentialSavings || 0);
     }, 0);
 
-    if (calculatedSavings > 0 && (analysis.summary.potentialSavings === 0 || analysis.summary.potentialSavings < calculatedSavings * 0.5)) {
+    if (calculatedSavings > 0) {
       analysis.summary.potentialSavings = calculatedSavings;
     }
   }
