@@ -4,7 +4,7 @@ import { Mail, Lock, Unlock, Check, X } from 'lucide-react-native';
 import { cn } from '@/lib/cn';
 import { useTaxStore } from '@/lib/state/tax-store';
 // Go up one level (..) to find leads-api in the src folder
-import { saveLeadToSheet } from '../leads-api';
+import { saveLeadToSheet } from '../../leads-api';
 
 // List of blocked disposable/temporary email domains
 const BLOCKED_DOMAINS = [
