@@ -600,11 +600,13 @@ export default function TaxOptimizerScreen() {
         />
       )}
 
-      {/* Email Gate Modal */}
+   {/* Email Gate Modal */}
       <EmailGate
         visible={showEmailGate}
         onSubmit={handleEmailSubmit}
         onClose={resetState}
+        // 👇 ADD THIS LINE:
+        country={countryMode === 'india' ? 'India' : 'US'}
         potentialSavings={processing.analysis
           ? formatCurrency(processing.analysis.summary.potentialSavings, countryMode)
           : undefined}
