@@ -137,6 +137,8 @@ export interface TaxAnalysisResult {
   };
   regimeComparison?: RegimeComparison;
   usComparison?: USComparison;
+  // Added currentGrossPay to allow TS to correct the math
+  currentGrossPay?: number;
   payFrequencyDetected?: string;
   calculationExplanation?: string;
   missedSavings: MissedSavingsItem[];
@@ -208,7 +210,7 @@ CALCULATION GUIDELINES:
 `;
 }
 
-// FIX: Updated to Strictly Enforce Pay Frequency Logic
+// FIX: Strictly Enforce Pay Frequency Logic by requesting raw inputs
 function buildUSPrompt(taxRulesText: string): string {
   return `You are a Tax Expert helping people SAVE MONEY on taxes.
 
@@ -217,8 +219,8 @@ ${taxRulesText}
 
 IMPORTANT: The document has been redacted for privacy. "[REDACTED_SSN]" indicates Social Security Numbers that were removed for security.
 
-**CRITICAL RULE: INCOME CALCULATION (THE "GOLDEN" NUMBER)**
-You must calculate the "Calculated Annual Income" using this specific logic. Do NOT skip this.
+**CRITICAL RULE: INCOME CALCULATION**
+You must extract the raw pay per period to allow for precise annualization.
 
 A. Extract **Current Gross Pay** from the document.
 B. Extract **Pay Frequency** (Weekly, Bi-Weekly, Semi-Monthly, Monthly).
@@ -228,12 +230,6 @@ C. **CALCULATE** the Annual Income strictly:
    - Semi-Monthly: Current Gross x 24
    - Monthly: Current Gross x 12
 D. **IGNORE** any "YTD Gross", "Year to Date", or "Total Income" fields printed on the document. They are misleading.
-
-**MATH GUARDRAILS (DO NOT IGNORE):**
-- IF Frequency is "Monthly" -> Formula MUST be: Pay x 12.
-- IF Frequency is "Bi-Weekly" -> Formula MUST be: Pay x 26.
-- **NEVER** calculate "Monthly" income using x26.
-- **NEVER** calculate "Bi-Weekly" income using x12.
 
 **ANALYSIS STEPS:**
 
@@ -257,15 +253,15 @@ D. **IGNORE** any "YTD Gross", "Year to Date", or "Total Income" fields printed 
 
 **OUTPUT FORMAT (JSON ONLY):**
 {
+  "currentGrossPay": <NUMBER - The raw gross pay for THIS SINGLE PAY PERIOD>,
+  "payFrequencyDetected": "Monthly/Bi-Weekly/Weekly/Semi-Monthly",
   "summary": {
     "totalIncome": <NUMBER - The value you calculated in Step C above>,
     "currentTaxLiability": <NUMBER - Annualized Federal Withholding>,
     "potentialSavings": <NUMBER>,
     "effectiveTaxRate": <NUMBER>
   },
-  "payFrequencyDetected": "Monthly/Bi-Weekly/Weekly",
   "calculationExplanation": "Detected <Hours> hours -> Frequency <Frequency>. Math: $<Gross> x <Multiplier> = $<Annual>",
-  "debug_note": "Hours: X, Freq: Y, Mult: Z",
   "missedSavings": [],
   "deductions": [],
   "recommendations": [],
@@ -273,6 +269,7 @@ D. **IGNORE** any "YTD Gross", "Year to Date", or "Total Income" fields printed 
 }
 `;
 }
+
 export interface AnalyzeOptions {
   redactedText: string;
   countryMode: CountryMode;
@@ -285,7 +282,6 @@ export async function analyzeTaxDocument(
   dynamicRules?: string
 ): Promise<TaxAnalysisResult> {
 
-  // FIX: Use VITE variable for Vercel compatibility
   const apiKey = import.meta.env.EXPO_PUBLIC_VIBECODE_OPENAI_API_KEY;
 
   if (!apiKey) {
@@ -343,50 +339,82 @@ export async function analyzeTaxDocument(
   const analysis: TaxAnalysisResult = JSON.parse(jsonMatch[0]);
   analysis.countryMode = countryMode;
 
-  // POST-PROCESSING FOR US MODE: Fix deductions and calculate proper tax savings
-  if (countryMode === 'us' && analysis.deductions && analysis.deductions.length > 0) {
-    const annualIncome = analysis.summary.totalIncome || 0;
-    let marginalRate = 0.24; // Default 24%
+  // --- POST-PROCESSING FOR US MODE ---
+  // Here we override the AI's math if it contradicts the frequency
+  if (countryMode === 'us') {
+    
+    // 1. MATH CORRECTION: Ensure Total Income matches Frequency
+    if (analysis.currentGrossPay && analysis.payFrequencyDetected) {
+      const freq = analysis.payFrequencyDetected.toLowerCase();
+      const gross = analysis.currentGrossPay;
+      let multiplier = 0;
 
-    if (annualIncome <= 11600) marginalRate = 0.10;
-    else if (annualIncome <= 47150) marginalRate = 0.12;
-    else if (annualIncome <= 100525) marginalRate = 0.22;
-    else if (annualIncome <= 191950) marginalRate = 0.24;
-    else if (annualIncome <= 243725) marginalRate = 0.32;
-    else if (annualIncome <= 609350) marginalRate = 0.35;
-    else marginalRate = 0.37;
-
-    let totalTaxSavings = 0;
-
-    analysis.deductions = analysis.deductions.map((deduction) => {
-      const category = deduction.category?.toLowerCase() || '';
-      const gap = Math.max(0, deduction.maxLimit - deduction.currentAmount);
-
-      if (category.includes('roth ira')) {
-        deduction.potentialSavings = gap;
-        return deduction;
+      if (freq.includes('month') && !freq.includes('semi')) {
+        multiplier = 12; // Strictly Monthly
+      } else if (freq.includes('bi')) {
+        multiplier = 26; // Strictly Bi-Weekly
+      } else if (freq.includes('week')) {
+        multiplier = 52; // Weekly
+      } else if (freq.includes('semi')) {
+        multiplier = 24; // Semi-Monthly
       }
 
-      if (category.includes('401') || category.includes('hsa')) {
-        const taxSavings = Math.round(gap * marginalRate);
-        if (deduction.potentialSavings === 0 || deduction.potentialSavings < taxSavings * 0.5) {
-          deduction.potentialSavings = taxSavings;
-        }
-        totalTaxSavings += deduction.potentialSavings;
+      // If we found a valid multiplier, force the calculation
+      // This fixes the issue where AI says "Monthly" but multiplies by 26
+      if (multiplier > 0) {
+        const correctedIncome = gross * multiplier;
+        analysis.summary.totalIncome = correctedIncome;
+        
+        // Update explanation to reflect the correction
+        analysis.calculationExplanation = `Corrected by System: $${gross.toLocaleString()} x ${multiplier} (${analysis.payFrequencyDetected}) = $${correctedIncome.toLocaleString()}`;
       }
-      return deduction;
-    });
-
-    if (totalTaxSavings > 0 && (analysis.summary.potentialSavings === 0 || analysis.summary.potentialSavings < totalTaxSavings * 0.5)) {
-      analysis.summary.potentialSavings = totalTaxSavings;
     }
 
-    if (analysis.usComparison) {
-      analysis.usComparison.annualSavings = analysis.summary.potentialSavings;
+    // 2. DEDUCTIONS & SAVINGS LOGIC (Existing logic preserved)
+    if (analysis.deductions && analysis.deductions.length > 0) {
+      const annualIncome = analysis.summary.totalIncome || 0;
+      let marginalRate = 0.24; // Default 24%
+
+      if (annualIncome <= 11600) marginalRate = 0.10;
+      else if (annualIncome <= 47150) marginalRate = 0.12;
+      else if (annualIncome <= 100525) marginalRate = 0.22;
+      else if (annualIncome <= 191950) marginalRate = 0.24;
+      else if (annualIncome <= 243725) marginalRate = 0.32;
+      else if (annualIncome <= 609350) marginalRate = 0.35;
+      else marginalRate = 0.37;
+
+      let totalTaxSavings = 0;
+
+      analysis.deductions = analysis.deductions.map((deduction) => {
+        const category = deduction.category?.toLowerCase() || '';
+        const gap = Math.max(0, deduction.maxLimit - deduction.currentAmount);
+
+        if (category.includes('roth ira')) {
+          deduction.potentialSavings = gap;
+          return deduction;
+        }
+
+        if (category.includes('401') || category.includes('hsa')) {
+          const taxSavings = Math.round(gap * marginalRate);
+          if (deduction.potentialSavings === 0 || deduction.potentialSavings < taxSavings * 0.5) {
+            deduction.potentialSavings = taxSavings;
+          }
+          totalTaxSavings += deduction.potentialSavings;
+        }
+        return deduction;
+      });
+
+      if (totalTaxSavings > 0 && (analysis.summary.potentialSavings === 0 || analysis.summary.potentialSavings < totalTaxSavings * 0.5)) {
+        analysis.summary.potentialSavings = totalTaxSavings;
+      }
+
+      if (analysis.usComparison) {
+        analysis.usComparison.annualSavings = analysis.summary.potentialSavings;
+      }
     }
   }
 
-  // POST-PROCESSING FOR INDIA MODE
+  // POST-PROCESSING FOR INDIA MODE (Existing logic)
   if (countryMode === 'india' && analysis.deductions && analysis.deductions.length > 0) {
     const calculatedSavings = analysis.deductions.reduce((total, deduction) => {
       return total + (deduction.potentialSavings || 0);
@@ -397,7 +425,7 @@ export async function analyzeTaxDocument(
     }
   }
 
-  // Missed Savings fallback check
+  // Missed Savings fallback check (Existing logic)
   if (analysis.summary.potentialSavings === 0 && analysis.missedSavings && analysis.missedSavings.length > 0) {
     if (countryMode === 'us') {
       const annualIncome = analysis.summary.totalIncome || 0;
