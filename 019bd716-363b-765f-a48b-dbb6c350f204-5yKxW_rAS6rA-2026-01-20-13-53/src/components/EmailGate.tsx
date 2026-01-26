@@ -8,46 +8,19 @@ import { saveLeadToSheet } from '../../leads-api';
 
 // List of blocked disposable/temporary email domains
 const BLOCKED_DOMAINS = [
-  'tempmail.com',
-  'throwaway.com',
-  'mailinator.com',
-  'guerrillamail.com',
-  'fakeinbox.com',
-  'temp-mail.org',
-  'disposablemail.com',
-  'yopmail.com',
-  'sharklasers.com',
-  'trashmail.com',
-  '10minutemail.com',
-  'getnada.com',
-  'maildrop.cc',
-  'dispostable.com',
-  'tempail.com',
-  'mohmal.com',
-  'emailondeck.com',
-  'tempr.email',
-  'discard.email',
-  'spamgourmet.com',
+  'tempmail.com', 'throwaway.com', 'mailinator.com', 'guerrillamail.com',
+  'fakeinbox.com', 'temp-mail.org', 'disposablemail.com', 'yopmail.com',
+  'sharklasers.com', 'trashmail.com', '10minutemail.com', 'getnada.com',
+  'maildrop.cc', 'dispostable.com', 'tempail.com', 'mohmal.com',
+  'emailondeck.com', 'tempr.email', 'discard.email', 'spamgourmet.com',
 ];
 
 // Common dummy email patterns to block
 const DUMMY_PATTERNS = [
-  /^test@/i,
-  /^dummy@/i,
-  /^fake@/i,
-  /^asdf@/i,
-  /^qwerty@/i,
-  /^abc@/i,
-  /^123@/i,
-  /^sample@/i,
-  /^example@/i,
-  /^no@/i,
-  /^none@/i,
-  /^null@/i,
-  /^admin@/i,
-  /^user@/i,
-  /^a{2,}@/i, // aa@, aaa@, etc.
-  /^[a-z]@/i, // single letter emails
+  /^test@/i, /^dummy@/i, /^fake@/i, /^asdf@/i, /^qwerty@/i,
+  /^abc@/i, /^123@/i, /^sample@/i, /^example@/i, /^no@/i,
+  /^none@/i, /^null@/i, /^admin@/i, /^user@/i,
+  /^a{2,}@/i, /^[a-z]@/i,
 ];
 
 interface EmailGateProps {
@@ -56,9 +29,10 @@ interface EmailGateProps {
   onClose?: () => void;
   isLoading?: boolean;
   potentialSavings?: string;
+  country?: string; // Added optional country prop to fix typescript error
 }
 
-export function EmailGate({ visible, onSubmit, onClose, isLoading, potentialSavings }: EmailGateProps) {
+export function EmailGate({ visible, onSubmit, onClose, isLoading, potentialSavings, country }: EmailGateProps) {
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const isEmailUsedToday = useTaxStore((s) => s.isEmailUsedToday);
@@ -103,27 +77,8 @@ export function EmailGate({ visible, onSubmit, onClose, isLoading, potentialSavi
     return { valid: true };
   };
 
-const handleSubmit = () => {
+  const handleSubmit = () => {
     // 1. Validation
-    if (!email.trim()) {
-      setError('Please enter your email address');
-      return;
-    }
-
-    // 2. Fire and Forget: Send to Google Sheet
-    // We do NOT await this. We let it run in the background.
-    saveLeadToSheet(
-      email, 
-      props.country || "Unknown", 
-      props.savings || "Unknown"
-    );
-
-    // 3. THE MISSING PIECE: Unlock the report immediately
-    // This removes the "Email Gate" and shows the user their data.
-    props.onSubmit(); 
-};
-  // --- NEW CODE END ---
-
     const validation = validateEmail(email);
     if (!validation.valid) {
       setError(validation.error || 'Please enter a valid email address');
@@ -131,6 +86,16 @@ const handleSubmit = () => {
     }
 
     setError(null);
+
+    // 2. Fire and Forget: Send to Google Sheet
+    // We pass "Unknown" for country if it's missing
+    saveLeadToSheet(
+      email, 
+      country || "Unknown", 
+      potentialSavings || "Unknown"
+    );
+
+    // 3. Unlock the report
     onSubmit(email.trim().toLowerCase());
   };
 
